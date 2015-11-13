@@ -11,15 +11,16 @@ def test_str(n):
     return _str
 
 
-SIZE = 2 ** 8
+SIZE = 2 ** 26
 
 
 #################################
 ##  ZeroMQ
-##  1.7GBps on IvyBridge laptop w/ 1MB size messages
+##  1.7GBps, IvyBridge laptop, 1MB messages
+##  3.75GBps, IvyBridge laptop, 64MB messages
 #################################
 def zmq_server(endpoint):
-    ctx = zmq.Context()
+    ctx = zmq.Context.instance()
     s = ctx.socket(zmq.REP)
     s.bind('ipc://' + endpoint)
     #s.bind('ipc://127.0.0.1:9001')
@@ -35,7 +36,7 @@ def zmq_server(endpoint):
 
 
 def zmq_client(endpoint):
-    ctx = zmq.Context()
+    ctx = zmq.Context.instance()
     s = ctx.socket(zmq.REQ)
     s.connect('ipc://' + endpoint)
     #s.connect('ipc://127.0.0.1:9001')
