@@ -1,4 +1,4 @@
-from process_mux import SimplePmux, PmuxModule
+from pmux import SimplePmux, PmuxModule
 
 
 class EchoModule1(PmuxModule):
