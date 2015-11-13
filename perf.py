@@ -22,8 +22,8 @@ SIZE = 2 ** 26
 def zmq_server(endpoint):
     ctx = zmq.Context.instance()
     s = ctx.socket(zmq.REP)
-    s.bind('ipc://' + endpoint)
-    #s.bind('ipc://127.0.0.1:9001')
+    #s.bind('ipc://' + endpoint)
+    s.bind('tcp://127.0.0.1:9001')
     try:
         while True:
             s.recv(copy=False)
@@ -38,8 +38,8 @@ def zmq_server(endpoint):
 def zmq_client(endpoint):
     ctx = zmq.Context.instance()
     s = ctx.socket(zmq.REQ)
-    s.connect('ipc://' + endpoint)
-    #s.connect('ipc://127.0.0.1:9001')
+    #s.connect('ipc://' + endpoint)
+    s.connect('tcp://127.0.0.1:9001')
     count = 0
 
     payload = test_str(SIZE)
