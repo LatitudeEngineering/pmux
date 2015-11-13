@@ -11,21 +11,22 @@ def test_str(n):
     return _str
 
 
-SIZE = 2 ** 20
+SIZE = 2 ** 8
 
 
 #################################
 ##  ZeroMQ
+##  1.7GBps on IvyBridge laptop w/ 1MB size messages
 #################################
 def zmq_server(endpoint):
-    ctx = zmq.Context(io_threads=2)
+    ctx = zmq.Context()
     s = ctx.socket(zmq.REP)
     s.bind('ipc://' + endpoint)
-    #s.bind('tcp://127.0.0.1:9001')
+    #s.bind('ipc://127.0.0.1:9001')
     try:
         while True:
-            s.recv_string()
-            s.send_string('ok')
+            s.recv(copy=False)
+            s.send('ok', copy=False)
     except:
         pass
     finally:
@@ -34,10 +35,10 @@ def zmq_server(endpoint):
 
 
 def zmq_client(endpoint):
-    ctx = zmq.Context(io_threads=2)
+    ctx = zmq.Context()
     s = ctx.socket(zmq.REQ)
     s.connect('ipc://' + endpoint)
-    #s.connect('tcp://127.0.0.1:9001')
+    #s.connect('ipc://127.0.0.1:9001')
     count = 0
 
     payload = test_str(SIZE)
@@ -45,8 +46,8 @@ def zmq_client(endpoint):
     start = time.time()
     try:
         while True:
-            s.send_string(payload)
-            s.recv_string()
+            s.send(payload, copy=False)
+            s.recv(copy=False)
             count += 1
     except:
         pass
@@ -107,8 +108,8 @@ def nano_client(endpoint):
 #################################
 def nn_server(endpoint):
     s = nnpy.Socket(nnpy.AF_SP, nnpy.PAIR)
-    s.bind('ipc://' + endpoint)
-    #s.bind('tcp://127.0.0.1:9001')
+    #s.bind('ipc://' + endpoint)
+    s.bind('tcp://127.0.0.1:9001')
     try:
         while True:
             s.recv()
@@ -119,8 +120,8 @@ def nn_server(endpoint):
 
 def nn_client(endpoint):
     s = nnpy.Socket(nnpy.AF_SP, nnpy.PAIR)
-    s.connect('ipc://' + endpoint)
-    #s.connect('tcp://127.0.0.1:9001')
+    #s.connect('ipc://' + endpoint)
+    s.connect('tcp://127.0.0.1:9001')
     count = 0
 
     payload = test_str(SIZE)
@@ -157,6 +158,8 @@ def mp_test():
                 conn.send(payload)
                 conn.recv()
                 count +=1
+        except:
+            pass
         finally:
             end = time.time()
             total = end - start
@@ -171,6 +174,8 @@ def mp_test():
             while True:
                 conn.recv()
                 conn.send('ok')
+        except:
+            pass
         finally:
             conn.close()
 
