@@ -355,7 +355,8 @@ class ProcessMux(object):
 
 
 class SimplePmux(ProcessMux):
-
+    """Simplified abstraction of ProcessMux.
+    """
     def __init__(self, mainsleep=0.1):
         self._routes = defaultdict(lambda: None)
         super(SimplePmux, self).__init__(mainsleep=mainsleep)
@@ -398,3 +399,4 @@ class SimplePmux(ProcessMux):
     def control(self, message, sender, _):
         """Forwards relevant arguments to route_message"""
         self.route_message(message, sender)
+
