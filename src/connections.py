@@ -16,26 +16,6 @@ def create_nnpy_server_socket(connection_string):
     return s
 
 
-class SourceConnection(object):
-    """Interface for receiving connection"""
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def recv(self):
-        pass
-
-
-class SinkConnection(object):
-    """Interface for sending connection"""
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def send(self):
-        pass
-
-
 class FrameworkConnection(object):
     """Boundary
     
@@ -59,13 +39,11 @@ class FrameworkConnection(object):
 
 
 class FrameworkClientConnection(FrameworkConnection):
-
     def create_connection(self, connection_string):
         return create_nnpy_client_socket(connection_string)
 
 
 class FrameworkServerConnection(FrameworkConnection):
-
     def create_connection(self, connection_string):
         return create_nnpy_server_socket(connection_string)
 
