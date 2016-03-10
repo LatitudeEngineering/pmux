@@ -15,8 +15,8 @@ class SourceConnection(Connection):
     def __init__(self, connection):
         super(SourceConnection, self).__init__(connection)
 
-    def send(self, data):
-        self._conn.send(data)
+    def recv(self):
+        return self._conn.recv()
 
 
 class SinkConnection(Connection):
@@ -25,48 +25,28 @@ class SinkConnection(Connection):
     def __init__(self, connection):
         super(SinkConnection, self).__init__(connection)
 
-    def recv(self):
-        return self._conn.recv()
+    def send(self, data):
+        self._conn.send(data)
 
 
-class RemoteConnectionFactory(object):
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def create_push_source((host, port)):
-        pass
-
-    @abstractmethod
-    def create_pull_sink((host, port)):
-        pass
-
-    @abstractmethod
-    def create_publish_source((host, port), topics=[]):
-        pass
-
-    @abstractmethod
-    def create_subscribe_sink((host, port), topics=[]):
-        pass
-
-
-class IpcConnectionFactory(object):
+class ConnectionFactory(object):
 
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def create_push_source(id):
+    def create_push_sink((host, port)):
         pass
 
     @abstractmethod
-    def create_pull_sink(id):
+    def create_pull_source((host, port)):
         pass
 
     @abstractmethod
-    def create_publish_source(id, topics=[]):
+    def create_publish_sink((host, port), topics=[]):
         pass
 
     @abstractmethod
-    def create_subscribe_sink(id, topics=[]):
+    def create_subscribe_source((host, port), topics=[]):
         pass
+
 

@@ -1,5 +1,4 @@
-from base import IpcConnectionFactory
-from base import RemoteConnectionFactory
+from base import ConnectionFactory
 from base import SourceConnection
 from base import SinkConnection
 import nnpy
@@ -45,48 +44,48 @@ def nanomsg_subscribe_socket(connection_details, topics, socket_func):
     else:
         for topic in topics:
             s.setsockopt(nnpy.SUB, nnpy.SUB_SUBSCRIBE, topic)
-    return SinkConnection(s)
+    return SourceConnection(s)
 
 
-class NanomsgIpc(IpcConnectionFactory):
+class NanomsgIpc(ConnectionFactory):
 
     @staticmethod
-    def create_push_source(id):
+    def create_push_sink(id):
         s = bind_ipc_socket(id, nnpy.PUSH)
-        return SourceConnection(s)
-
-    @staticmethod
-    def create_pull_sink(id):
-        s = connect_ipc_socket(id, nnpy.PULL)
         return SinkConnection(s)
 
     @staticmethod
-    def create_publish_source(id, topics=[]):
-        s = bind_ipc_socket(id, nnpy.PUB)
+    def create_pull_source(id):
+        s = connect_ipc_socket(id, nnpy.PULL)
         return SourceConnection(s)
 
     @staticmethod
-    def create_subscribe_sink(id, topics=[]):
+    def create_publish_sink(id, topics=[]):
+        s = bind_ipc_socket(id, nnpy.PUB)
+        return SinkConnection(s)
+
+    @staticmethod
+    def create_subscribe_source(id, topics=[]):
         return nanomsg_subscribe_socket(id, topics, connect_ipc_socket)
 
 
-class NanomsgRemote(object):
+class NanomsgRemote(ConnectionFactory):
 
     @staticmethod
-    def create_push_source((host, port)):
+    def create_push_sink((host, port)):
         s = bind_tcp_socket((host,port), nnpy.PUSH)
-        return SourceConnection(s)
-
-    @staticmethod
-    def create_pull_sink((host, port)):
-        s = connect_tcp_socket((host, port), nnpy.PULL)
         return SinkConnection(s)
 
     @staticmethod
-    def create_publish_source((host, port), topics=[]):
-        s = bind_tcp_socket((host,port), nnpy.PUB)
-        return s
+    def create_pull_source((host, port)):
+        s = connect_tcp_socket((host, port), nnpy.PULL)
+        return SourceConnection(s)
 
     @staticmethod
-    def create_subscribe_sink((host, port), topics=[]):
+    def create_publish_sink((host, port), topics=[]):
+        s = bind_tcp_socket((host,port), nnpy.PUB)
+        return SinkConnection(s)
+
+    @staticmethod
+    def create_subscribe_source((host, port), topics=[]):
         return nanomsg_subscribe_socket((host,port), topics, connect_tcp_socket)
