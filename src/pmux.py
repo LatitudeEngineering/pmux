@@ -2,9 +2,11 @@ import traceback
 from abc import ABCMeta
 from abc import abstractmethod
 from abc import abstractproperty
+from serializers import MsgpackSerializer
+import msgpack
 
 
-class UmuxNode(object):
+class PmuxNode(object):
     """Base uMux object implementing general structure of processing.
 
     """
@@ -12,9 +14,13 @@ class UmuxNode(object):
     __metaclass__ = ABCMeta
 
 
-    def __init__(self, source_connection=None, sink_connection=None):
+    def __init__(   self,
+                    source_connection=None,
+                    sink_connection=None,
+                    serializer=MsgpackSerializer()):
         self._source = source_connection
         self._sink = sink_connection
+        self._serializer = serializer
 
     @abstractproperty
     def name(self):
@@ -42,11 +48,13 @@ class UmuxNode(object):
             input_message = None
             output_messages = None
             if self._source is not None:
-                input_message = self._source.recv()
+                packed = self._source.recv()
+                input_message = self._serializer.deserialize(packed)
             output_messages = self._loop(input_message)
             if self._sink is not None:
                 for msg in output_messages:
-                    self._sink.send(msg)
+                    to_send = self._serializer.serialize(msg)
+                    self._sink.send(to_send)
 
     def run(self):
         try:
