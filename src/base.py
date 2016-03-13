@@ -26,7 +26,9 @@ class SinkConnection(Connection):
         super(SinkConnection, self).__init__(connection)
 
     def send(self, data):
-        self._conn.send(data)
+        if not isinstance(data, str):
+            raise Exception("data must be of type str")
+        self._conn.send(list(data))
 
 
 class ConnectionFactory(object):
