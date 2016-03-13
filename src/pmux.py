@@ -3,7 +3,6 @@ from abc import ABCMeta
 from abc import abstractmethod
 from abc import abstractproperty
 from serializers import MsgpackSerializer
-import msgpack
 
 
 class PmuxNode(object):
