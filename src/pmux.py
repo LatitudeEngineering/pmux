@@ -53,7 +53,7 @@ class PmuxNode(object):
             if self._sink is not None:
                 for msg in output_messages:
                     to_send = self._serializer.serialize(msg)
-                    self._sink.send(to_send)
+                    self._sink.send(list(to_send))
 
     def run(self):
         try:
