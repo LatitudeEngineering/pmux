@@ -3,6 +3,7 @@ from abc import ABCMeta
 from abc import abstractmethod
 from abc import abstractproperty
 from serializers import MsgpackSerializer
+from servers import SimpleServer
 
 
 class PmuxNode(object):
@@ -62,3 +63,20 @@ class PmuxNode(object):
             traceback.print_exc()
         finally:
             self._cleanup()
+
+
+class FunctionServer(object):
+    """Handles executing functions for some remote client"""
+    def __init__(self):
+        self._server = SimpleServer()
+        pass
+
+    def register(self, func):
+        self._server.register(func)
+        return func
+
+    def run_local(self, id):
+        pass
+
+    def run_remote(self, port):
+        pass
