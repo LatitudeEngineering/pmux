@@ -29,12 +29,12 @@ class SimpleServer(FrameworkServer):
         self._lookup['hello_world'] = hello_world
 
     def function_lookup(self):
-        return self._lookup
+        return self._lookup.items()
 
-    def add_function(self, name, func):
+    def register(self, func):
         if not callable(func):
             raise NotCallableException("func must be callable.")
-        self.function_lookup[name] = func
+        self.function_lookup[func.__name__] = func
 
     def __call__(self, function_name, args):
         try:
@@ -44,48 +44,4 @@ class SimpleServer(FrameworkServer):
             print e
             traceback.print_exc()
 
-
-class ServerContext(object):
-    """Interactor encapsulating Server, FrameworkConnection, and Serializer.
-    
-    """
-
-    def __init__(self, server, framework_connection, serializer):
-        self._server = server
-        self._fc = framework_connection
-        self._serializer = serializer
-
-    def service():
-        msg = self._fc.recv()
-        print msg
-        obj = self._serializer.deserialize(msg)
-
-
-def create_server(local=None, remote=None):
-    """Validates and returns Server handle
-    Factory-ish function.
-    """
-    pass
-
-
-def server_loop(server_obj, framework_connection):
-    msg = fsc.recv()
-    print msg
-
-
-def try_serverloop(server_obj, framework_connection):
-    try:
-        server_loop(server_obj, framework_connection)
-    except Exception as e:
-        traceback.print_exc()
-
-
-def run_server(server_context):
-    s = Server()
-    fsc = FrameworkServerConnection(CONN_STR)
-    while True:
-        # get message
-        msg = fsc.recv()
-        # do something with message
-        print msg
 
