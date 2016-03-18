@@ -4,6 +4,7 @@ from abc import ABCMeta
 from base import ConnectionFactory
 from base import SourceConnection
 from base import SinkConnection
+from serializers import MsgpackSerializer
 # message queue library
 import nnpy
 
@@ -11,22 +12,9 @@ import nnpy
 ROOT_DIR = "/tmp/pmux_"
 
 
-def create_nnpy_client_socket(connection_string):
-    s = nnpy.Socket(nnpy.AF_SP, nnpy.REQ)
-    s.connect(connection_string)
-    return s
-
-
-def create_nnpy_server_socket(connection_string):
-    s = nnpy.Socket(nnpy.AF_SP, nnpy.REP)
-    s.bind(connection_string)
-    return s
-
-
 def bind_ipc_socket(id, nnpy_type):
     s = nnpy.Socket(nnpy.AF_SP, nnpy_type)
     ipc_str = "ipc://%s%s" % (ROOT_DIR, id)
-    print ipc_str
     s.bind(ipc_str)
     return s
 
@@ -64,7 +52,34 @@ def nanomsg_subscribe_socket(connection_details, topics, socket_func):
     return SourceConnection(s)
 
 
+class ClientServerConnection(object):
+
+    def __init__(self, socket, serializer):
+        self._sock = socket
+        self._ser = serializer
+
+    def send(self, data):
+        packed = self._ser.serialize(data)
+        self._sock.send(list(packed))
+
+    def recv(self):
+        data = self._sock.recv()
+        unpacked = self._ser.deserialize(data)
+        return unpacked
+
+
+
 class NanomsgIpc(ConnectionFactory):
+
+    @staticmethod
+    def create_client_socket(id):
+        s = connect_ipc_socket(id, nnpy.REQ)
+        return ClientServerConnection(s, MsgpackSerializer())
+
+    @staticmethod
+    def create_server_socket(id):
+        s = bind_ipc_socket(id, nnpy.REP)
+        return ClientServerConnection(s, MsgpackSerializer())
 
     @staticmethod
     def create_push_sink(id):

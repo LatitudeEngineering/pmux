@@ -2,6 +2,7 @@ import traceback
 from abc import ABCMeta
 from abc import abstractmethod
 from abc import abstractproperty
+from connections import NanomsgIpc
 from serializers import MsgpackSerializer
 from servers import SimpleServer
 
@@ -65,18 +66,39 @@ class PmuxNode(object):
             self._cleanup()
 
 
+def infinite_loop(connection, server):
+    while True:
+        msg = connection.recv()
+        function_name = msg["function_name"]
+        args = msg["args"]
+        try:
+            output = server(function_name, args)
+            connection.send(output)
+        except:
+            traceback.print_exc()
+
+
+def run(connection, server):
+    try:
+        infinite_loop(connection, server)
+    except:
+        traceback.print_exc()
+    finally:
+        connection.close()
+
+
 class FunctionServer(object):
     """Handles executing functions for some remote client"""
     def __init__(self):
         self._server = SimpleServer()
-        pass
 
     def register(self, func):
         self._server.register(func)
         return func
 
     def run_local(self, id):
-        pass
+        conn = NanomsgIpc.create_server_socket(id)
+        run(conn, self._server)
 
     def run_remote(self, port):
-        pass
+        raise Exception("Not implemented yet.")

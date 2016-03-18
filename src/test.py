@@ -1,5 +1,7 @@
 from pmux import PmuxNode
 from factories import NanomsgIpc
+from pmux import FunctionServer
+
 
 class TestNode(PmuxNode):
 
@@ -21,4 +23,18 @@ def testfunc():
     node = TestNode(source, None)
     node.run()
 
-testfunc()
+
+server = FunctionServer()
+
+@server.register
+def test1():
+    return "test1 executed"
+
+@server.register
+def test2():
+    return "test2 executed"
+
+@server.register
+def echo(to_echo):
+    return to_echo
+

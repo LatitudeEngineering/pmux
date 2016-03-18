@@ -1,36 +1,26 @@
+from abc import ABCMeta
+from connections import NanomsgIpc
+
+
 class SimpleClient(object):
     """Interactor
 
     Facilitates the client connection to the framework.
     """
-    def __init__(self, framework_connection):
-        self._conn = framework_connection
-    def execute(self, args):
-        self._conn.send(args)
+    __metaclass__ = ABCMeta
+
+    def execute(self, function_name, args=[], metadata={}):
+        obj = {
+            "function_name": function_name,
+            "args": args,
+            "metadata": metadata,
+        }
+        self._conn.send(obj)
         return self._conn.recv()
 
 
-def validate_local_configuration(string_id):
-    pass
+class SimpleIpc(SimpleClient):
 
+    def __init__(self, id):
+        self._conn = NanomsgIpc.create_client_socket(id) 
 
-def validate_remote_configuration(host, port):
-    pass
-
-
-def create_remote_simpleclient(host, port):
-    pass
-
-
-def create_local_simpleclient(string_id):
-    pass
-
-
-def connect_to_local_server(string_id):
-    validate_local_configuration(string_id)
-    return create_local_simpleclient(connection_string)
-
-
-def connect_to_remote_server(host, port):
-    validate_remote_configuration(host, port)
-    return create_remote_simpleclient(host, port)

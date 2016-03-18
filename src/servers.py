@@ -1,4 +1,5 @@
 import abc
+import traceback
 
 
 class FrameworkServer(object):
@@ -11,7 +12,7 @@ class FrameworkServer(object):
         pass
 
     @abc.abstractmethod
-    def add_function(self, name, func):
+    def register(self, func):
         pass
 
 
@@ -34,12 +35,15 @@ class SimpleServer(FrameworkServer):
     def register(self, func):
         if not callable(func):
             raise NotCallableException("func must be callable.")
-        self.function_lookup[func.__name__] = func
+        self._lookup[func.__name__] = func
 
     def __call__(self, function_name, args):
+        print "function_name: ", function_name
+        print "args: ", args
         try:
-            f = self.function_lookup[function_name]
+            f = self._lookup[function_name]
             result = f(*args) 
+            return result
         except Exception as e:
             print e
             traceback.print_exc()

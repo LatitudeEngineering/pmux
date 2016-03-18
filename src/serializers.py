@@ -9,6 +9,9 @@ class Serializer(object):
 
     __metaclass__ = abc.ABCMeta
 
+    def __init__(self):
+        pass
+
     @abc.abstractmethod
     def serialize(self, obj):
         pass
