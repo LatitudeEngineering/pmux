@@ -1,6 +1,18 @@
 from abc import ABCMeta
+from functools import partial
 from connections import NanomsgIpc
 
+
+def execute(conn, function_name, *args, **kwargs):
+    metadata = kwargs.get("metadata") or {}
+    obj = {
+        "function_name": function_name,
+        "args": args,
+        "metadata": metadata,
+    }
+    conn.send(obj)
+    return conn.recv()
+    
 
 class SimpleClient(object):
     """Interactor
@@ -9,15 +21,12 @@ class SimpleClient(object):
     """
     __metaclass__ = ABCMeta
 
-    def execute(self, function_name, args=[], metadata={}):
-        obj = {
-            "function_name": function_name,
-            "args": args,
-            "metadata": metadata,
-        }
-        self._conn.send(obj)
-        return self._conn.recv()
-
+    def __getattr__(self, name):
+        #def to_execute(args=[], meta={}):
+        #    return execute(self._conn, name, args, meta)
+        #return to_execute
+        return partial(execute, self._conn, name)
+    
 
 class SimpleIpc(SimpleClient):
 
