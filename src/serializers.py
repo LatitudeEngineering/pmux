@@ -1,24 +1,4 @@
-import abc
 import msgpack
-
-
-class Serializer(object):
-    """Boundary for serialization
-
-    """
-
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self):
-        pass
-
-    @abc.abstractmethod
-    def serialize(self, obj):
-        pass
-
-    @abc.abstractmethod
-    def deserialize(self, serialized):
-        pass
 
 
 class MsgpackSerializer(Serializer):
