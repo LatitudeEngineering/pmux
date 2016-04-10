@@ -6,6 +6,7 @@ import nnpy
 
 ROOT_DIR = "/tmp/pmux_"
 
+
 def bind_ipc_socket(id, nnpy_type):
     s = nnpy.Socket(nnpy.AF_SP, nnpy_type)
     ipc_str = "ipc://%s%s" % (ROOT_DIR, id)
