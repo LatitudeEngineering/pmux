@@ -156,3 +156,19 @@ class ComputationResponse(object):
     def metadata(self):
         return self._meta
 
+
+class PmuxMessage(object):
+    """Entity encapsulating a message within the pmux framework"""
+
+    def __init__(self, message_name, **kwargs):
+        self._name = message_name
+        self._dict = kwargs
+    
+    @property
+    def message_name(self):
+        return self._name
+
+    @property
+    def message_values(self):
+        return self._dict
+
