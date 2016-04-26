@@ -1,10 +1,17 @@
+from base import Serializer
 import msgpack
+
+
+def get_default_serializer():
+    return MsgpackSerializer
 
 
 class MsgpackSerializer(Serializer):
 
-    def serialize(self, obj):
+    @staticmethod
+    def serialize(obj):
         return msgpack.dumps(obj)
 
-    def deserialize(self, serialized):
+    @staticmethod
+    def deserialize(serialized):
         return msgpack.loads(serialized)

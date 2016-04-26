@@ -2,9 +2,61 @@ import traceback
 from abc import ABCMeta
 from abc import abstractmethod
 from abc import abstractproperty
-from connections import NanomsgIpc
-from serializers import MsgpackSerializer
-from servers import SimpleServer
+from base import FunctionClient
+from base import FunctionServer
+from connections import LocalConnectionFactory
+from connections import LocalConnectionInfo
+
+
+def infinite_loop(connection, server):
+    while True:
+        msg = connection.recv()
+        function_name = msg["function_name"]
+        args = msg["args"]
+        try:
+            output = server(function_name, args)
+            connection.send(output)
+        except:
+            traceback.print_exc()
+
+
+def run(connection, server):
+    try:
+        infinite_loop(connection, server)
+    except:
+        traceback.print_exc()
+    finally:
+        connection.close()
+
+
+class PmuxServer(object):
+    """Handles executing functions for some local or remote client"""
+    def __init__(self):
+        self._fs = FunctionServer()
+
+    def register(self, func):
+        self._fs.register(func)
+        return func
+
+    def run_local(self, string_id):
+        info = LocalConnectionInfo(string_id)
+        conn = LocalConnectionFactory.create_server_connection(info)
+        run(conn, self._server)
+
+    def run_remote(self, port):
+        raise NotImplementedError("Remote PmuxServers are not implemented yet")
+
+
+class PmuxClientFactory(object):
+    """Handles execution of functions resident on the local computer"""
+
+    def create_local_client(self, string_id):
+        info = LocalConnectionInfo(string_id)
+        conn = LocalConnectionFactory.create_client_connection(info)
+        return PmuxClient(conn)
+
+    def create_remote_client(self, interface, port):
+        raise NotImplementedError("Remote PmuxClients are not implemented yet")
 
 
 class PmuxNode(object):
@@ -64,42 +116,4 @@ class PmuxNode(object):
             traceback.print_exc()
         finally:
             self._cleanup()
-
-
-def infinite_loop(connection, server):
-    while True:
-        msg = connection.recv()
-        function_name = msg["function_name"]
-        args = msg["args"]
-        try:
-            output = server(function_name, args)
-            connection.send(output)
-        except:
-            traceback.print_exc()
-
-
-def run(connection, server):
-    try:
-        infinite_loop(connection, server)
-    except:
-        traceback.print_exc()
-    finally:
-        connection.close()
-
-
-class FunctionServer(object):
-    """Handles executing functions for some remote client"""
-    def __init__(self):
-        self._server = SimpleServer()
-
-    def register(self, func):
-        self._server.register(func)
-        return func
-
-    def run_local(self, id):
-        conn = NanomsgIpc.create_server_socket(id)
-        run(conn, self._server)
-
-    def run_remote(self, port):
-        raise Exception("Not implemented yet.")
 

@@ -1,14 +1,15 @@
-"""Boundary object to abstract away communication layer."""
 from abc import abstractmethod
 from abc import ABCMeta
-from base import ConnectionFactory
-from base import SourceConnection
-from base import SinkConnection
-from serializers import MsgpackSerializer
+from base import RemoteConnectionInfo
+from base import LocalConnectionInfo
+from base import PmuxConnection
+from base import PmuxSink
+from base import PmuxSource
+from base import PmuxConnectionFactory
+from serializers import get_default_serializer
 # message queue library
 import nnpy
-
-
+# directory where pmux file descriptors are stored
 ROOT_DIR = "/tmp/pmux_"
 
 
@@ -49,75 +50,56 @@ def nanomsg_subscribe_socket(connection_details, topics, socket_func):
     else:
         for topic in topics:
             s.setsockopt(nnpy.SUB, nnpy.SUB_SUBSCRIBE, topic)
-    return SourceConnection(s)
+    return s
 
 
-class ClientServerConnection(object):
-
-    def __init__(self, socket, serializer):
-        self._sock = socket
-        self._ser = serializer
-
-    def send(self, data):
-        packed = self._ser.serialize(data)
-        self._sock.send(list(packed))
-
-    def recv(self):
-        data = self._sock.recv()
-        unpacked = self._ser.deserialize(data)
-        return unpacked
+def ensure_localconnectioninfo(obj):
+    if not isinstance(obj, LocalConnectionInfo):
+        raise ConfigurationException("obj must be LocalConnectionInfo")
+    return None
 
 
+def ensure_remoteconnectioninfo(obj):
+    if not isinstance(obj, RemoteConnectionInfo):
+        raise ConfigurationException("obj must be RemoteConnectionInfo")
+    return None
 
-class NanomsgIpc(ConnectionFactory):
+
+class LocalConnectionFactory(PmuxConnectionFactory):
 
     @staticmethod
-    def create_client_socket(id):
-        s = connect_ipc_socket(id, nnpy.REQ)
-        return ClientServerConnection(s, MsgpackSerializer())
+    def create_client_connection(local_connection_info):
+        ensure_localconnectioninfo(local_connection_info)
+        s = connect_ipc_socket(local_connection_info.string_id, nnpy.REQ)
+        return PmuxConnection(s, get_default_serializer())
 
     @staticmethod
-    def create_server_socket(id):
-        s = bind_ipc_socket(id, nnpy.REP)
-        return ClientServerConnection(s, MsgpackSerializer())
+    def create_server_connection(local_connection_info):
+        ensure_localconnectioninfo(local_connection_info)
+        s = bind_ipc_socket(local_connection_info.string_id, nnpy.REP)
+        return PmuxConnection(s, get_default_serializer())
 
     @staticmethod
-    def create_push_sink(id):
-        s = bind_ipc_socket(id, nnpy.PUSH)
-        return SinkConnection(s)
+    def create_push_source(local_connection_info):
+        ensure_localconnectioninfo(local_connection_info)
+        s = bind_ipc_socket(local_connection_info.string_id, nnpy.PUSH)
+        return PmuxSource(s, get_default_serializer())
 
     @staticmethod
-    def create_pull_source(id):
-        s = connect_ipc_socket(id, nnpy.PULL)
-        return SourceConnection(s)
+    def create_pull_sink(local_connection_info):
+        ensure_localconnectioninfo(local_connection_info)
+        s = connect_ipc_socket(local_connection_info.string_id, nnpy.PULL)
+        return PmuxSink(s, get_default_serializer())
 
     @staticmethod
-    def create_publish_sink(id, topics=[]):
-        s = bind_ipc_socket(id, nnpy.PUB)
-        return SinkConnection(s)
+    def create_publish_source(local_connection_info):
+        ensure_localconnectioninfo(local_connection_info)
+        s = bind_ipc_socket(local_connection_info.string_id, nnpy.PUB)
+        return PmuxSource(s, get_default_serializer())
 
     @staticmethod
-    def create_subscribe_source(id, topics=[]):
-        return nanomsg_subscribe_socket(id, topics, connect_ipc_socket)
+    def create_subscribe_sink(local_connection_info):
+        ensure_localconnectioninfo(local_connection_info)
+        s = nanomsg_subscribe_socket(local_connection_info.string_id, [], connect_ipc_socket)
+        return PmuxSink(s, get_default_serializer())
 
-
-class NanomsgRemote(ConnectionFactory):
-
-    @staticmethod
-    def create_push_sink((host, port)):
-        s = bind_tcp_socket((host,port), nnpy.PUSH)
-        return SinkConnection(s)
-
-    @staticmethod
-    def create_pull_source((host, port)):
-        s = connect_tcp_socket((host, port), nnpy.PULL)
-        return SourceConnection(s)
-
-    @staticmethod
-    def create_publish_sink((host, port), topics=[]):
-        s = bind_tcp_socket((host,port), nnpy.PUB)
-        return SinkConnection(s)
-
-    @staticmethod
-    def create_subscribe_source((host, port), topics=[]):
-        return nanomsg_subscribe_socket((host,port), topics, connect_tcp_socket)
