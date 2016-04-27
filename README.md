@@ -3,7 +3,7 @@ A library aiming to ease development of distributed programs by composing a mess
 When using the PmuxServer and PmuxClient, functions are executed remotely using ComputationRequest and ComputationResponse messages, as in the example below:
 ```python
 computation_request = {
-    "function_name": hello_world,
+    "function_name": "hello_world",
     "stdin": [],
     "meta": {}
 }
