@@ -3,6 +3,10 @@ from abc import ABCMeta
 from collections import namedtuple
 from functools import partial
 
+# this should go away eventually
+import nnpy
+import select
+
 
 ###############################################
 ##  Exceptions
@@ -62,6 +66,8 @@ class PmuxConnection(object):
     def __init__(self, connection, serializer):
         self._conn = connection
         self._ser = serializer
+        self._poll = select.poll()
+        self._poll.register(self._conn.getsockopt(nnpy.SOL_SOCKET, nnpy.RCVFD), select.POLLIN)
 
     def send(self, obj):
         str_data = self._ser.serialize(obj)
@@ -71,6 +77,12 @@ class PmuxConnection(object):
         str_data = self._conn.recv()
         obj = self._ser.deserialize(str_data)
         return obj
+
+    def close(self):
+        self._conn.close()
+
+    def poll(self):
+        return self._poll.poll(0) == []
 
 
 class PmuxSink(PmuxConnection):
