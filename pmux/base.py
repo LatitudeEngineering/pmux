@@ -62,8 +62,6 @@ class PmuxConnection(object):
     def __init__(self, connection, serializer):
         self._conn = connection
         self._ser = serializer
-        self._poll = select.poll()
-        self._poll.register(self._conn.getsockopt(nnpy.SOL_SOCKET, nnpy.RCVFD), select.POLLIN)
 
     def send(self, obj):
         str_data = self._ser.serialize(obj)

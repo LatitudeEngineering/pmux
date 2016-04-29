@@ -20,13 +20,18 @@ class ConnectionWrap(object):
         self.send = nnpy_socket.send
         self.recv = nnpy_socket.recv
         self.close = nnpy_socket.close
+        self.setsockopt = nnpy_socket.setsockopt
+        self.getsockopt = nnpy_socket.getsockopt
         # construct poll function
-        p = select.poll()
-        fd = nnpy_socket.getsockopt(nnpy.SOL_SOCKET, nnpy.RCVFD)
-        p.register(fd, select.POLLIN)
-        def poll():
-            return p.poll() != []
-        self.poll = poll
+        try:
+            p = select.poll()
+            fd = nnpy_socket.getsockopt(nnpy.SOL_SOCKET, nnpy.RCVFD)
+            p.register(fd, select.POLLIN)
+            def poll():
+                return p.poll(0) != []
+            self.poll = poll
+        except:
+            print "poll function not set up"
 
 def bind_ipc_socket(id, nnpy_type):
     s = nnpy.Socket(nnpy.AF_SP, nnpy_type)
