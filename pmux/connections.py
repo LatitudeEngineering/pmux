@@ -66,6 +66,16 @@ def ensure_remoteconnectioninfo(obj):
 
 
 class LocalConnectionFactory(PmuxConnectionFactory):
+    """constructs connections used on the local device
+
+    """
+    
+    @staticmethod
+    def create_pair_connection(local_connection_info, bind_socket):
+        ensure_localconnectioninfo(local_connection_info)
+        create_function = bind_ipc_socket if bind_socket else connect_ipc_socket
+        s = create_function(local_connection_info.string_id, nnpy.PAIR)
+        return PmuxConnection(s, get_default_serializer())
 
     @staticmethod
     def create_client_connection(local_connection_info):

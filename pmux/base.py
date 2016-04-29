@@ -93,7 +93,11 @@ LocalConnectionInfo = namedtuple("IpcConnectionInfo", ["string_id"])
 
 class PmuxConnectionFactory(object):
     """specifies connection creation functions"""
-    
+ 
+    @staticmethod
+    def create_pair_connection(connection_info, bind_socket):
+        pass
+   
     @staticmethod
     def create_client_connection(connection_info):
         pass
@@ -133,7 +137,7 @@ def execute(conn, function_name, *args, **kwargs):
     return conn.recv()
     
 
-class PmuxClient(object):
+class FunctionClient(object):
     """Interactor
 
     Facilitates the client connection to the framework.
