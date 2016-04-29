@@ -7,24 +7,39 @@ from base import PmuxSink
 from base import PmuxSource
 from base import PmuxConnectionFactory
 from serializers import get_default_serializer
+import select
 # message queue library
 import nnpy
 # directory where pmux file descriptors are stored
 ROOT_DIR = "/tmp/pmux_"
 
 
+class ConnectionWrap(object):
+    """convenient wrapper for nnpy sockets"""
+    def __init__(self, nnpy_socket):
+        self.send = nnpy_socket.send
+        self.recv = nnpy_socket.recv
+        self.close = nnpy_socket.close
+        # construct poll function
+        p = select.poll()
+        fd = nnpy_socket.getsockopt(nnpy.SOL_SOCKET, nnpy.RCVFD)
+        p.register(fd, select.POLLIN)
+        def poll():
+            return p.poll() != []
+        self.poll = poll
+
 def bind_ipc_socket(id, nnpy_type):
     s = nnpy.Socket(nnpy.AF_SP, nnpy_type)
     ipc_str = "ipc://%s%s" % (ROOT_DIR, id)
     s.bind(ipc_str)
-    return s
+    return ConnectionWrap(s)
 
 
 def connect_ipc_socket(id, nnpy_type):
     s = nnpy.Socket(nnpy.AF_SP, nnpy_type)
     ipc_str = "ipc://%s%s" % (ROOT_DIR, id)
     s.connect(ipc_str)
-    return s
+    return ConnectionWrap(s)
 
 
 def bind_tcp_socket((host,port), nnpy_type):

@@ -3,10 +3,6 @@ from abc import ABCMeta
 from collections import namedtuple
 from functools import partial
 
-# this should go away eventually
-import nnpy
-import select
-
 
 ###############################################
 ##  Exceptions
@@ -82,7 +78,7 @@ class PmuxConnection(object):
         self._conn.close()
 
     def poll(self):
-        return self._poll.poll(0) == []
+        return self._conn.poll()
 
 
 class PmuxSink(PmuxConnection):
@@ -97,6 +93,9 @@ class PmuxSource(PmuxConnection):
 
     def recv(self):
         raise ConfigurationException("PmuxSources cannot recv")
+
+    def poll(self):
+        raise ConfigurationException("PmuxSources cannot poll")
 
 
 RemoteConnectionInfo = namedtuple("TcpConnectionInfo", ["ip", "port"])
