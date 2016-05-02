@@ -106,8 +106,8 @@ class PmuxSource(PmuxConnection):
         return False
 
 
-RemoteConnectionInfo = namedtuple("TcpConnectionInfo", ["ip", "port"])
-LocalConnectionInfo = namedtuple("IpcConnectionInfo", ["string_id"])
+RemoteConnectionInfo = namedtuple("TcpConnectionInfo", ["ip", "port", "perform_bind"])
+LocalConnectionInfo = namedtuple("IpcConnectionInfo", ["string_id", "perform_bind"])
 
 
 class PmuxConnectionFactory(object):

@@ -101,8 +101,9 @@ class LocalConnectionFactory(PmuxConnectionFactory):
     """
     
     @staticmethod
-    def create_pair_connection(local_connection_info, bind_socket):
+    def create_pair_connection(local_connection_info):
         ensure_localconnectioninfo(local_connection_info)
+        bind_socket = local_connection_info.perform_bind
         create_function = bind_ipc_socket if bind_socket else connect_ipc_socket
         s = create_function(local_connection_info.string_id, nnpy.PAIR)
         return PmuxConnection(s, get_default_serializer())
@@ -110,36 +111,48 @@ class LocalConnectionFactory(PmuxConnectionFactory):
     @staticmethod
     def create_client_connection(local_connection_info):
         ensure_localconnectioninfo(local_connection_info)
-        s = connect_ipc_socket(local_connection_info.string_id, nnpy.REQ)
+        bind_socket = local_connection_info.perform_bind
+        create_function = bind_ipc_socket if bind_socket else connect_ipc_socket
+        s = create_function(local_connection_info.string_id, nnpy.REQ)
         return PmuxConnection(s, get_default_serializer())
 
     @staticmethod
     def create_server_connection(local_connection_info):
         ensure_localconnectioninfo(local_connection_info)
-        s = bind_ipc_socket(local_connection_info.string_id, nnpy.REP)
+        bind_socket = local_connection_info.perform_bind
+        create_function = bind_ipc_socket if bind_socket else connect_ipc_socket
+        s = create_function(local_connection_info.string_id, nnpy.REP)
         return PmuxConnection(s, get_default_serializer())
 
     @staticmethod
     def create_push_source(local_connection_info):
         ensure_localconnectioninfo(local_connection_info)
-        s = bind_ipc_socket(local_connection_info.string_id, nnpy.PUSH)
+        bind_socket = local_connection_info.perform_bind
+        create_function = bind_ipc_socket if bind_socket else connect_ipc_socket
+        s = create_function(local_connection_info.string_id, nnpy.PUSH)
         return PmuxSource(s, get_default_serializer())
 
     @staticmethod
     def create_pull_sink(local_connection_info):
         ensure_localconnectioninfo(local_connection_info)
-        s = connect_ipc_socket(local_connection_info.string_id, nnpy.PULL)
+        bind_socket = local_connection_info.perform_bind
+        create_function = bind_ipc_socket if bind_socket else connect_ipc_socket
+        s = create_function(local_connection_info.string_id, nnpy.PULL)
         return PmuxSink(s, get_default_serializer())
 
     @staticmethod
     def create_publish_source(local_connection_info):
         ensure_localconnectioninfo(local_connection_info)
-        s = bind_ipc_socket(local_connection_info.string_id, nnpy.PUB)
+        bind_socket = local_connection_info.perform_bind
+        create_function = bind_ipc_socket if bind_socket else connect_ipc_socket
+        s = create_function(local_connection_info.string_id, nnpy.PUB)
         return PmuxSource(s, get_default_serializer())
 
     @staticmethod
     def create_subscribe_sink(local_connection_info):
         ensure_localconnectioninfo(local_connection_info)
-        s = nanomsg_subscribe_socket(local_connection_info.string_id, [], connect_ipc_socket)
+        bind_socket = local_connection_info.perform_bind
+        create_function = bind_ipc_socket if bind_socket else connect_ipc_socket
+        s = nanomsg_subscribe_socket(local_connection_info.string_id, [], create_function)
         return PmuxSink(s, get_default_serializer())
 
