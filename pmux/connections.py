@@ -24,14 +24,24 @@ class ConnectionWrap(object):
         self.getsockopt = nnpy_socket.getsockopt
         # construct poll function
         try:
-            p = select.poll()
-            fd = nnpy_socket.getsockopt(nnpy.SOL_SOCKET, nnpy.RCVFD)
-            p.register(fd, select.POLLIN)
-            def poll():
-                return p.poll(0) != []
-            self.poll = poll
+            read_p = select.poll()
+            read_fd = nnpy_socket.getsockopt(nnpy.SOL_SOCKET, nnpy.RCVFD)
+            read_p.register(read_fd, select.POLLIN)
+            def check_readable():
+                return read_p.poll(0) != []
+            self.check_readable = check_readable
         except:
-            print "poll function not set up"
+            self.check_readable = None
+        try:
+            write_p = select.poll()
+            write_fd = nnpy_socket.getsockopt(nnpy.SOL_SOCKET, nnpy.SNDFD)
+            write_p.register(write_fd, select.POLLOUT)
+            def check_writeable():
+                return write_p.poll(0) != []
+            self.check_writeable = check_writeable
+        except:
+            self.check_writeable = None
+
 
 def bind_ipc_socket(id, nnpy_type):
     s = nnpy.Socket(nnpy.AF_SP, nnpy_type)

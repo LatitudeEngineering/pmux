@@ -75,8 +75,13 @@ class PmuxConnection(object):
     def close(self):
         self._conn.close()
 
-    def poll(self):
-        return self._conn.poll()
+    @property
+    def readable(self):
+        return self._conn.check_readable()
+
+    @property
+    def writeable(self):
+        return self._conn.check_writeable()
 
 
 class PmuxSink(PmuxConnection):
@@ -85,6 +90,10 @@ class PmuxSink(PmuxConnection):
     def send(self, obj):
         raise ConfigurationException("PmuxSinks cannot send")
 
+    @property
+    def writeable(self):
+        return False
+
 
 class PmuxSource(PmuxConnection):
     """Specifies recv is unsupported"""
@@ -92,8 +101,9 @@ class PmuxSource(PmuxConnection):
     def recv(self):
         raise ConfigurationException("PmuxSources cannot recv")
 
-    def poll(self):
-        raise ConfigurationException("PmuxSources cannot poll")
+    @property
+    def readable(self):
+        return False
 
 
 RemoteConnectionInfo = namedtuple("TcpConnectionInfo", ["ip", "port"])
