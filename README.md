@@ -14,6 +14,20 @@ computation_response = {
     "meta": {}
 }
 ```
+
+An additional paradigm is "functions are processes", or infinitely iterating function executions.
+This is the idea behind PmuxNode.
+All you need to do is implement the iterate function and use PmuxMessage:
+```python
+msg = {
+    "source": "source node",
+    "destination": "destination node",
+    "stdin": []
+    "meta": {}
+}
+```
+
+
 Using a serialization protocol containing types allows us to reason the values of our messages.
 Using a message queue encapsulating multiple architecture patterns and transport backends facilitates efficiency of implementation while remaining simple.
 These facts combined with interface implementations in multiple languages, for both the serialization protocol and the message queue, leaves us with a powerful way to develop distributed applications independent of language.
