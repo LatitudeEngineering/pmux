@@ -38,20 +38,6 @@ class PmuxServer(object):
         self._fs.register(func)
         return func
 
-    def step_local(self, string_id):
-        info = LocalConnectionInfo(string_id)
-        conn = LocalConnectionFactory.create_server_connection(info)
-        try:
-            msg = conn.recv()
-            function_name = msg["function_name"]
-            args = msg["args"]
-            output = server(function_name, args)
-            connection.send(output)
-        except:
-            traceback.print_exc()
-
-
-
     def run_local(self, string_id):
         run(conn, self._server)
 
@@ -72,7 +58,7 @@ class PmuxClientFactory(object):
 
 
 class PmuxNode(object):
-    """Base uMux object implementing general structure of processing.
+    """Base pmux node implementing general structure of processing.
 
     """
 
