@@ -18,3 +18,7 @@ Using a serialization protocol containing types allows us to reason the values o
 Using a message queue encapsulating multiple architecture patterns and transport backends facilitates efficiency of implementation while remaining simple.
 These facts combined with interface implementations in multiple languages, for both the serialization protocol and the message queue, leaves us with a powerful way to develop distributed applications independent of language.
 
+## TODO
+0. Strip out anything extra
+1. Clean up and revise PmuxNode
+2. Create tests and implement CI
