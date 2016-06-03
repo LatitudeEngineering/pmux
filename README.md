@@ -36,3 +36,7 @@ These facts combined with interface implementations in multiple languages, for b
 0. Strip out anything extra
 1. Clean up and revise PmuxNode
 2. Create tests and implement CI
+
+## STATUS
+This is still pretty alpha.
+Can't say I didn't warn you.
