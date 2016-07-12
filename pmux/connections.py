@@ -159,10 +159,11 @@ class LocalConnectionFactory(PmuxConnectionFactory):
 
 def helper_remote(remote_connection_info, nnpy_sock_type):
     """helper for creating remote connections"""
-    ensure_remoteconnectioninfo(remote_connection_info)
-    bind_socket = remote_connection_info.perform_bind
+    rci = remote_connection_info
+    ensure_remoteconnectioninfo(rci)
+    bind_socket = rci.perform_bind
     create_function = bind_tcp_socket if bind_socket else connect_tcp_socket
-    s = create_function(remote_connection_info.string_id, nnpy_sock_type)
+    s = create_function((rci.ip, rci.port), nnpy_sock_type)
     return s 
 
 
@@ -201,9 +202,10 @@ class RemoteConnectionFactory(PmuxConnectionFactory):
 
     @staticmethod
     def create_subscribe_sink(remote_connection_info):
-        ensure_remoteconnectioninfo(remote_connection_info)
-        bind_socket = remote_connection_info.perform_bind
+        rci = remote_connection_info
+        ensure_remoteconnectioninfo(rci)
+        bind_socket = rci.perform_bind
         create_function = bind_tcp_socket if bind_socket else connect_tcp_socket
-        s = nanomsg_subscribe_socket(remote_connection_info.string_id, [], create_function)
-        return PmuxSink(s, get_default_serializer)
+        s = nanomsg_subscribe_socket((rci.ip, rci.port), [], create_function)
+        return PmuxSink(s, get_default_serializer())
 
