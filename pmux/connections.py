@@ -159,7 +159,7 @@ class LocalConnectionFactory(PmuxConnectionFactory):
 
 def helper_remote(remote_connection_info, nnpy_sock_type):
     """helper for creating remote connections"""
-    ensure_remoteconnectioninfo(remote_connection_info, nnpy_sock_type)
+    ensure_remoteconnectioninfo(remote_connection_info)
     bind_socket = remote_connection_info.perform_bind
     create_function = bind_tcp_socket if bind_socket else connect_tcp_socket
     s = create_function(remote_connection_info.string_id, nnpy_sock_type)
