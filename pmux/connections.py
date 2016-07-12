@@ -156,3 +156,54 @@ class LocalConnectionFactory(PmuxConnectionFactory):
         s = nanomsg_subscribe_socket(local_connection_info.string_id, [], create_function)
         return PmuxSink(s, get_default_serializer())
 
+
+def helper_remote(remote_connection_info, nnpy_sock_type):
+    """helper for creating remote connections"""
+    ensure_remoteconnectioninfo(remote_connection_info, nnpy_sock_type)
+    bind_socket = remote_connection_info.perform_bind
+    create_function = bind_tcp_socket if bind_socket else connect_tcp_socket
+    s = create_function(remote_connection_info.string_id, nnpy_sock_type)
+    return s 
+
+
+class RemoteConnectionFactory(PmuxConnectionFactory):
+    """constructs connections to remotes"""
+
+    @staticmethod
+    def create_pair_connection(remote_connection_info):
+        s = helper_remote(remote_connection_info, nnpy.PAIR)
+        return PmuxConnection(s, get_default_serializer())
+
+    @staticmethod
+    def create_client_connection(remote_connection_info):
+        s = helper_remote(remote_connection_info, nnpy.REQ)
+        return PmuxConnection(s, get_default_serializer())
+
+    @staticmethod
+    def create_server_connection(remote_connection_info):
+        s = helper_remote(remote_connection_info, nnpy.REP)
+        return PmuxConnection(s, get_default_serializer())
+
+    @staticmethod
+    def create_push_source(remote_connection_info):
+        s = helper_remote(remote_connection_info, nnpy.PUSH)
+        return PmuxSource(s, get_default_serializer())
+
+    @staticmethod
+    def create_pull_sink(remote_connection_info):
+        s = helper_remote(remote_connection_info, nnpy.PULL)
+        return PmuxSink(s, get_default_serializer())
+
+    @staticmethod
+    def create_publish_source(remote_connection_info):
+        s = helper_remote(remote_connection_info, nnpy.PUB)
+        return PmuxSource(s, get_default_serializer())
+
+    @staticmethod
+    def create_subscribe_sink(remote_connection_info):
+        ensure_remoteconnectioninfo(remote_connection_info)
+        bind_socket = remote_connection_info.perform_bind
+        create_function = bind_tcp_socket if bind_socket else connect_tcp_socket
+        s = nanomsg_subscribe_socket(remote_connection_info.string_id, [], create_function)
+        return PmuxSink(s, get_default_serializer)
+
