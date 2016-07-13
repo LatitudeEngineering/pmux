@@ -30,21 +30,21 @@ def local_client(string_id):
 
 
 def remote_server(ip, port):
-    info = RemoteConnectionInfo((ip, port), True)
+    info = RemoteConnectionInfo(ip, port, True)
     return RemoteConnectionFactory.create_server_connection(info)
 
 
 def remote_client(ip, port):
-    info = RemoteConnectionInfo((ip, port), False)
+    info = RemoteConnectionInfo(ip, port, False)
     return RemoteConnectionFactory.create_client_connection(info)
 
 
 def remote_publish(ip, port):
-    info = RemoteConnectionInfo((ip, port), True)
+    info = RemoteConnectionInfo(ip, port, True)
     return RemoteConnectionFactory.create_publish_source(info)
 
 
 def remote_subscribe(ip, port):
-    info = RemoteConnectionInfo((ip, port), False)
+    info = RemoteConnectionInfo(ip, port, False)
     return RemoteConnectionFactory.create_subscribe_sink(info)
 
